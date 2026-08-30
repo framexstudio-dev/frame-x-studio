@@ -1,0 +1,139 @@
+const KEY='framex-store-v9';
+const LEGACY=['framex-store-v8','framex-store-v7','framex-store-v5','framex-store-v2'];
+const AUTH='framex-admin-auth-v3';
+const SESSION='framex-admin-session-v3';
+const DB_NAME='framex-assets-v2';
+const DB_STORE='files';
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const uid=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`;
+const esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const clone=v=>JSON.parse(JSON.stringify(v));
+
+const BUSINESS_CATEGORIES=[
+'Agência de marketing','Advocacia','Academia','Arquitetura','Automotivo','Bar / Pub','Barbearia','Beleza / Estética','Clínica médica','Clínica odontológica','Consultoria','Contabilidade','Cursos / Educação','E-commerce / Loja virtual','Eventos','Farmácia','Floricultura','Fotografia','Imobiliária','Loja de roupas / Moda','Marketplace','Nutrição','Padaria / Confeitaria','Pet shop','Portfólio profissional','Psicologia','Restaurante / Gastronomia','Salão de beleza','Saúde / Bem-estar','Site de relacionamento','Site para escolher filmes e séries','Software / SaaS','Tecnologia / Startup','Turismo / Hotelaria','Outro'
+];
+const VIDEO_CATEGORIES=['Publicidade com IA','Avatar com IA','Modelo virtual','TikTok Shop','Vídeo institucional','Criativo para anúncio','Conteúdo para redes sociais','Demonstração de produto','UGC com IA','Motion / Animação','Outro'];
+const IMAGE_CATEGORIES=['Modelo virtual','Produto / E-commerce','Criativo publicitário','Social media','Identidade visual','Antes e depois','Editorial / Fashion','Mockup','Banner / Campanha','Outro'];
+
+const defaults={
+ projects:[],videos:[],images:[],reviews:[],leads:[],ideas:[],campaigns:[],
+ settings:{
+  whatsapp:'5521989784737', phone:'(21) 98978-4737', location:'Todos os Santos\nRio de Janeiro — RJ', socialLabel:'Frame X Studio',
+  instagramPersonal:'https://instagram.com/eucaiocavalcante', instagramFrameX:'',
+  heroTitle:'Ideias que viram experiências digitais.',
+  heroText:'Sites, Inteligência Artificial, conteúdo e soluções digitais criadas com estratégia, tecnologia e atenção aos detalhes.'
+ }
+};
+
+function normalizeItem(x,i){return {...x,id:x.id||uid(),published:x.published!==false,status:x.status||((x.published!==false)?'published':'draft'),featured:!!x.featured,favorite:!!x.favorite,order:x.order??i};}
+function migrate(raw){
+ const d=clone(defaults); if(!raw) return d;
+ for(const k of ['projects','videos','images','reviews','leads','ideas','campaigns']) if(Array.isArray(raw[k])) d[k]=raw[k];
+ if(Array.isArray(raw.media)){ d.videos=raw.media.filter(x=>x.type==='video'); d.images=raw.media.filter(x=>x.type==='image'); }
+ d.settings={...d.settings,...(raw.settings||{})};
+ d.projects=d.projects.map(normalizeItem); d.videos=d.videos.map(normalizeItem); d.images=d.images.map(normalizeItem);
+ return d;
+}
+function load(){
+ try{
+  let raw=localStorage.getItem(KEY);
+  if(!raw){for(const k of LEGACY){raw=localStorage.getItem(k); if(raw) break;}}
+  const s=migrate(raw?JSON.parse(raw):null); localStorage.setItem(KEY,JSON.stringify(s)); return s;
+ }catch(e){console.error(e); return clone(defaults)}
+}
+function save(s,rerender=true){localStorage.setItem(KEY,JSON.stringify(s)); if(rerender) render();}
+
+function openDb(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(DB_STORE))r.result.createObjectStore(DB_STORE)};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function putBlob(file){const db=await openDb(),id='asset_'+uid();return new Promise((res,rej)=>{const r=db.transaction(DB_STORE,'readwrite').objectStore(DB_STORE).put(file,id);r.onsuccess=()=>res(id);r.onerror=()=>rej(r.error)})}
+async function delBlob(id){if(!id)return;const db=await openDb();return new Promise(res=>{const r=db.transaction(DB_STORE,'readwrite').objectStore(DB_STORE).delete(id);r.onsuccess=r.onerror=()=>res()})}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)}
+function credentials(){try{return JSON.parse(localStorage.getItem(AUTH)||'null')}catch{return null}}
+
+function authScreen(mode=credentials()?'login':'register'){
+ const has=!!credentials();
+ $('#auth').innerHTML=`<div class="authPage"><div class="authCard glass"><div class="authBrand"><img src="assets/frame-x-logo.png" alt="Frame X"><div><b>FRAME X</b><small>STUDIO · ADMIN</small></div></div><div class="authKicker">PAINEL ADMINISTRATIVO</div><h1>${mode==='register'?'Criar acesso':'Bem-vindo de volta'}</h1><p>${mode==='register'?'Cadastre seu acesso para administrar todo o portfólio.':'Entre para gerenciar sites, vídeos, imagens, leads e conteúdo.'}</p><div class="authTabs"><button id="tabLogin" class="${mode==='login'?'active':''}">Entrar</button><button id="tabRegister" class="${mode==='register'?'active':''}">${has?'Alterar acesso':'Cadastrar'}</button></div><form id="authForm" class="authForm"><label>Login<input id="authUser" autocomplete="username" placeholder="Seu login" required></label><label>Senha<input id="authPass" type="password" autocomplete="current-password" placeholder="Sua senha" minlength="4" required></label>${mode==='register'?'<label>Confirmar senha<input id="authPass2" type="password" placeholder="Repita sua senha" minlength="4" required></label>':''}<button class="btn" type="submit">${mode==='register'?'Criar acesso →':'Entrar →'}</button></form><p id="authMsg" class="authMsg"></p><small class="authNote">Versão local para testes. Na publicação final, a autenticação será movida para backend seguro.</small></div></div>`;
+ $('#tabLogin').onclick=()=>authScreen('login'); $('#tabRegister').onclick=()=>authScreen('register');
+ $('#authForm').onsubmit=e=>{e.preventDefault();const u=$('#authUser').value.trim(),p=$('#authPass').value;
+  if(mode==='register'){
+   if(!u||p.length<4){$('#authMsg').textContent='Use um login e uma senha com pelo menos 4 caracteres.';return}
+   if(p!==$('#authPass2').value){$('#authMsg').textContent='As senhas não coincidem.';return}
+   localStorage.setItem(AUTH,JSON.stringify({user:u,pass:hash(p)})); localStorage.setItem(SESSION,'1'); openAdmin();
+  }else{
+   const c=credentials(); if(c&&c.user===u&&c.pass===hash(p)){localStorage.setItem(SESSION,'1');openAdmin()} else $('#authMsg').textContent='Login ou senha incorretos.';
+  }
+ };
+}
+
+let current='dashboard';
+function openAdmin(){
+ $('#auth').innerHTML=''; $('#adminApp').classList.remove('hidden');
+ $$('aside [data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;$$('aside [data-tab]').forEach(x=>x.classList.toggle('active',x===b));render();});
+ $('#logout').onclick=()=>{localStorage.removeItem(SESSION);location.reload()}; render();
+}
+const content=()=>$('#content');
+function render(){
+ const s=load(); const titles={dashboard:'Dashboard',projects:'Sites / Portfólio',videos:'Vídeos',images:'Imagens',leads:'Leads',ideas:'Ideias & Ofertas',reviews:'Avaliações',settings:'Site & Configurações'};
+ $('#title').textContent=titles[current]||'Admin';
+ ({dashboard:renderDashboard,projects:renderProjects,videos:renderVideos,images:renderImages,leads:renderLeads,ideas:renderIdeas,reviews:renderReviews,settings:renderSettings}[current]||renderDashboard)(s);
+}
+function metric(n,label){return `<div class="metric"><b>${n}</b><span>${label}</span></div>`}
+function renderDashboard(s){
+ const drafts=[...s.projects,...s.videos,...s.images].filter(x=>x.status==='draft'||x.published===false).length;
+ content().innerHTML=`<div class="dashboardGrid">${metric(s.projects.length,'Sites')}${metric(s.videos.length,'Vídeos')}${metric(s.images.length,'Imagens')}${metric(s.leads.filter(x=>x.status==='Novo').length,'Leads novos')}${metric(drafts,'Rascunhos')}</div><div class="settingsGrid"><div class="adminPanel"><div class="panelHead"><div><h3>Atalhos rápidos</h3><p>Cadastre conteúdo em poucos cliques.</p></div></div><div class="backupActions"><button class="btn mini" id="dashProject">+ Site</button><button class="btn mini" id="dashVideo">+ Vídeo</button><button class="btn mini" id="dashImage">+ Imagem</button></div></div><div class="adminPanel"><h3>Fila comercial</h3><p><b>${s.leads.filter(x=>x.status==='Novo').length}</b> lead(s) aguardando contato.</p><button class="btn mini ghost" id="goLeads">Abrir leads</button></div></div><div class="adminPanel"><h3>Destaques atuais</h3><div class="managerList">${[...s.projects,...s.videos,...s.images].filter(x=>x.featured).slice(0,6).map(x=>`<div class="managerItem leadItem"><div class="managerInfo"><div class="managerBadges"><span>DESTAQUE</span></div><h4>${esc(x.name||x.title||'Conteúdo')}</h4></div></div>`).join('')||'<div class="emptyState">Nenhum destaque marcado.</div>'}</div></div>`;
+ $('#dashProject').onclick=()=>projectEditor(s); $('#dashVideo').onclick=()=>videoEditor(s); $('#dashImage').onclick=()=>imageEditor(s); $('#goLeads').onclick=()=>{current='leads';render()};
+}
+function badges(x){return `<div class="managerBadges"><span class="${x.published!==false&&x.status!=='draft'?'ok':'warn'}">${x.published!==false&&x.status!=='draft'?'PUBLICADO':'RASCUNHO'}</span>${x.featured?'<span>DESTAQUE</span>':''}${x.favorite?'<span>★ FAVORITO</span>':''}</div>`}
+function actionButtons(type,i,len){return `<div class="managerActions"><button data-up="${type}:${i}" ${i===0?'disabled':''}>↑</button><button data-down="${type}:${i}" ${i===len-1?'disabled':''}>↓</button><button data-edit="${type}:${i}">Editar</button><button data-toggle="${type}:${i}">Publicar/ocultar</button><button class="danger" data-del="${type}:${i}">Excluir</button></div>`}
+function bindCommon(s,type,editor){const list=s[type];
+ $$(`[data-edit^="${type}:"]`).forEach(b=>b.onclick=()=>editor(s,+b.dataset.edit.split(':')[1]));
+ $$(`[data-toggle^="${type}:"]`).forEach(b=>b.onclick=()=>{const x=list[+b.dataset.toggle.split(':')[1]];x.published=!(x.published!==false);x.status=x.published?'published':'draft';save(s)});
+ $$(`[data-del^="${type}:"]`).forEach(b=>b.onclick=async()=>{const i=+b.dataset.del.split(':')[1];if(!confirm('Excluir este item?'))return;if(list[i].assetId)await delBlob(list[i].assetId);list.splice(i,1);save(s)});
+ $$(`[data-up^="${type}:"]`).forEach(b=>b.onclick=()=>{const i=+b.dataset.up.split(':')[1];if(i>0){[list[i-1],list[i]]=[list[i],list[i-1]];save(s)}});
+ $$(`[data-down^="${type}:"]`).forEach(b=>b.onclick=()=>{const i=+b.dataset.down.split(':')[1];if(i<list.length-1){[list[i+1],list[i]]=[list[i],list[i+1]];save(s)}});
+}
+function modal(html){$('#modalRoot').innerHTML=`<div class="modalBackdrop"><div class="modalBox">${html}</div></div>`;$$('[data-close-modal]').forEach(b=>b.onclick=closeModal)}
+function closeModal(){$('#modalRoot').innerHTML=''}
+function optionList(items,value){return items.map(x=>`<option ${x===value?'selected':''}>${esc(x)}</option>`).join('')}
+function generateDescription(kind,name,category){const n=name||'Este projeto';
+ const siteMap={
+  'Floricultura':`${n} é uma experiência digital criada para apresentar flores, presentes e arranjos de forma elegante, facilitar pedidos e aproximar a marca de seus clientes.`,
+  'Padaria / Confeitaria':`${n} apresenta produtos, especialidades e informações da marca de forma acolhedora, moderna e pensada para facilitar pedidos e visitas.`,
+  'Site de relacionamento':`${n} foi pensado para criar conexões de forma simples, intuitiva e responsiva, com uma experiência focada em descoberta e interação.`,
+  'Site para escolher filmes e séries':`${n} transforma a escolha do que assistir em uma experiência rápida e divertida, usando preferências para sugerir conteúdos de forma personalizada.`,
+  'E-commerce / Loja virtual':`${n} foi desenvolvido para valorizar produtos, simplificar a jornada de compra e criar uma experiência comercial clara, rápida e responsiva.`,
+  'Advocacia':`${n} apresenta serviços jurídicos com clareza, credibilidade e uma comunicação profissional, facilitando o primeiro contato com potenciais clientes.`
+ };
+ if(kind==='project') return siteMap[category]||`${n} é um projeto digital desenvolvido para o segmento de ${category||'negócios'}, unindo apresentação profissional, navegação responsiva e uma experiência pensada para o público da marca.`;
+ if(kind==='video') return `${n} é um conteúdo de ${category||'vídeo digital'} criado pela Frame X Studio com foco em impacto visual, comunicação clara e apresentação profissional da marca ou produto.`;
+ return `${n} é uma peça visual de ${category||'conteúdo digital'} desenvolvida para valorizar identidade, produto e comunicação com acabamento profissional e atenção aos detalhes.`;
+}
+
+function renderProjects(s){content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Sites de portfólio</h3><p>Cadastre link, segmento, descrição e prévia. A prévia automática usa o próprio link do projeto.</p></div><button id="newProject" class="btn mini">+ Adicionar site</button></div><div class="managerList">${s.projects.map((p,i)=>`<article class="managerItem"><img class="managerThumb" src="${esc(p.image||'assets/project-1.png')}"><div class="managerInfo">${badges(p)}<h4>${esc(p.name||'Projeto')}</h4><p>${esc(p.category||'')} · ${esc(p.description||'')}</p></div>${actionButtons('projects',i,s.projects.length)}</article>`).join('')||'<div class="emptyState">Nenhum site cadastrado.</div>'}</div></div>`;$('#newProject').onclick=()=>projectEditor(s);bindCommon(s,'projects',projectEditor)}
+function projectEditor(s,i=null){const p=i==null?{id:uid(),name:'',category:'Site institucional',description:'',url:'',previewMode:'auto',image:'',assetId:'',published:true,featured:false,favorite:false}:clone(s.projects[i]);
+ modal(`<div class="modalHead"><div><small>SITE / PORTFÓLIO</small><h2>${i==null?'Novo site':'Editar site'}</h2></div><button data-close-modal>×</button></div><form id="projectForm" class="editorForm"><div class="formGrid"><label>Nome<input id="pName" value="${esc(p.name)}" required></label><label>Categoria / segmento<select id="pCategory">${optionList(BUSINESS_CATEGORIES,p.category)}</select></label></div><label>Descrição<div class="inlineField"><textarea id="pDescription" rows="4">${esc(p.description)}</textarea><button class="btn mini ghost" type="button" id="generateProjectDescription">Gerar descrição</button></div></label><label>Link real do site<input id="pUrl" value="${esc(p.url)}" placeholder="https://..." required></label><div class="formGrid"><label>Tipo de prévia<select id="pPreview"><option value="auto" ${p.previewMode==='auto'?'selected':''}>Prévia automática pelo link</option><option value="image" ${p.previewMode==='image'?'selected':''}>Screenshot longa / imagem</option></select></label><label>Imagem por URL<input id="pImage" value="${esc(p.image||'')}" placeholder="https://..."></label></div><label class="uploadBox">Ou envie screenshot longa<input id="pFile" type="file" accept="image/*"></label><div class="checkRow"><label><input id="pPublished" type="checkbox" ${p.published!==false?'checked':''}> Publicar</label><label><input id="pFeatured" type="checkbox" ${p.featured?'checked':''}> Destaque</label><label><input id="pFavorite" type="checkbox" ${p.favorite?'checked':''}> Favorito interno</label></div><div class="modalActions"><button type="button" class="btn ghost" data-close-modal>Cancelar</button><button class="btn" type="submit">Salvar site</button></div></form>`);
+ $('#generateProjectDescription').onclick=()=>$('#pDescription').value=generateDescription('project',$('#pName').value.trim(),$('#pCategory').value);
+ $('#projectForm').onsubmit=async e=>{e.preventDefault();const file=$('#pFile').files[0];if(file){if(p.assetId)await delBlob(p.assetId);p.assetId=await putBlob(file);p.image=''}Object.assign(p,{name:$('#pName').value.trim(),category:$('#pCategory').value,description:$('#pDescription').value.trim(),url:$('#pUrl').value.trim(),previewMode:$('#pPreview').value,image:$('#pImage').value.trim(),published:$('#pPublished').checked,status:$('#pPublished').checked?'published':'draft',featured:$('#pFeatured').checked,favorite:$('#pFavorite').checked});if(i==null)s.projects.unshift(p);else s.projects[i]=p;save(s,false);closeModal();render();};
+}
+
+function renderVideos(s){content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Vídeos</h3><p>Vídeos do portfólio, IA, TikTok Shop, publicidade e conteúdo.</p></div><button id="newVideo" class="btn mini">+ Adicionar vídeo</button></div><div class="managerList">${s.videos.map((v,i)=>`<article class="managerItem"><div class="managerThumb mediaPlaceholder">▶</div><div class="managerInfo">${badges(v)}<h4>${esc(v.title||'Vídeo')}</h4><p>${esc(v.category||'')} · ${esc(v.description||'')}</p></div>${actionButtons('videos',i,s.videos.length)}</article>`).join('')||'<div class="emptyState">Nenhum vídeo cadastrado.</div>'}</div></div>`;$('#newVideo').onclick=()=>videoEditor(s);bindCommon(s,'videos',videoEditor)}
+function videoEditor(s,i=null){const v=i==null?{id:uid(),title:'',category:'Publicidade com IA',description:'',url:'',assetId:'',published:true,featured:false,favorite:false}:clone(s.videos[i]);
+ modal(`<div class="modalHead"><div><small>VÍDEO</small><h2>${i==null?'Novo vídeo':'Editar vídeo'}</h2></div><button data-close-modal>×</button></div><form id="videoForm" class="editorForm"><div class="formGrid"><label>Título<input id="vTitle" value="${esc(v.title)}" required></label><label>Categoria<select id="vCategory">${optionList(VIDEO_CATEGORIES,v.category)}</select></label></div><label>Descrição<div class="inlineField"><textarea id="vDescription" rows="4">${esc(v.description)}</textarea><button class="btn mini ghost" type="button" id="generateVideoDescription">Gerar descrição</button></div></label><label>Link do vídeo / YouTube<input id="vUrl" value="${esc(v.url||'')}" placeholder="https://..."></label><label class="uploadBox">Ou envie o arquivo de vídeo<input id="vFile" type="file" accept="video/*"></label><div class="checkRow"><label><input id="vPublished" type="checkbox" ${v.published!==false?'checked':''}> Publicar</label><label><input id="vFeatured" type="checkbox" ${v.featured?'checked':''}> Destaque</label><label><input id="vFavorite" type="checkbox" ${v.favorite?'checked':''}> Favorito interno</label></div><div class="modalActions"><button type="button" class="btn ghost" data-close-modal>Cancelar</button><button class="btn" type="submit">Salvar vídeo</button></div></form>`);
+ $('#generateVideoDescription').onclick=()=>$('#vDescription').value=generateDescription('video',$('#vTitle').value.trim(),$('#vCategory').value);
+ $('#videoForm').onsubmit=async e=>{e.preventDefault();const file=$('#vFile').files[0];if(file){if(v.assetId)await delBlob(v.assetId);v.assetId=await putBlob(file)}Object.assign(v,{title:$('#vTitle').value.trim(),category:$('#vCategory').value,description:$('#vDescription').value.trim(),url:$('#vUrl').value.trim(),published:$('#vPublished').checked,status:$('#vPublished').checked?'published':'draft',featured:$('#vFeatured').checked,favorite:$('#vFavorite').checked});if(i==null)s.videos.unshift(v);else s.videos[i]=v;save(s,false);closeModal();render();};
+}
+
+function renderImages(s){content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Imagens</h3><p>Modelos virtuais, criativos, produtos, campanhas e peças visuais.</p></div><button id="newImage" class="btn mini">+ Adicionar imagem</button></div><div class="managerList">${s.images.map((v,i)=>`<article class="managerItem"><img class="managerThumb" src="${esc(v.url||v.image||'assets/project-1.png')}"><div class="managerInfo">${badges(v)}<h4>${esc(v.title||'Imagem')}</h4><p>${esc(v.category||'')} · ${esc(v.description||'')}</p></div>${actionButtons('images',i,s.images.length)}</article>`).join('')||'<div class="emptyState">Nenhuma imagem cadastrada.</div>'}</div></div>`;$('#newImage').onclick=()=>imageEditor(s);bindCommon(s,'images',imageEditor)}
+function imageEditor(s,i=null){const v=i==null?{id:uid(),title:'',category:'Criativo publicitário',description:'',url:'',assetId:'',published:true,featured:false,favorite:false}:clone(s.images[i]);
+ modal(`<div class="modalHead"><div><small>IMAGEM</small><h2>${i==null?'Nova imagem':'Editar imagem'}</h2></div><button data-close-modal>×</button></div><form id="imageForm" class="editorForm"><div class="formGrid"><label>Título<input id="iTitle" value="${esc(v.title)}" required></label><label>Categoria<select id="iCategory">${optionList(IMAGE_CATEGORIES,v.category)}</select></label></div><label>Descrição<div class="inlineField"><textarea id="iDescription" rows="4">${esc(v.description)}</textarea><button class="btn mini ghost" type="button" id="generateImageDescription">Gerar descrição</button></div></label><label>Imagem por URL<input id="iUrl" value="${esc(v.url||'')}" placeholder="https://..."></label><label class="uploadBox">Ou envie a imagem<input id="iFile" type="file" accept="image/*"></label><div class="checkRow"><label><input id="iPublished" type="checkbox" ${v.published!==false?'checked':''}> Publicar</label><label><input id="iFeatured" type="checkbox" ${v.featured?'checked':''}> Destaque</label><label><input id="iFavorite" type="checkbox" ${v.favorite?'checked':''}> Favorito interno</label></div><div class="modalActions"><button type="button" class="btn ghost" data-close-modal>Cancelar</button><button class="btn" type="submit">Salvar imagem</button></div></form>`);
+ $('#generateImageDescription').onclick=()=>$('#iDescription').value=generateDescription('image',$('#iTitle').value.trim(),$('#iCategory').value);
+ $('#imageForm').onsubmit=async e=>{e.preventDefault();const file=$('#iFile').files[0];if(file){if(v.assetId)await delBlob(v.assetId);v.assetId=await putBlob(file)}Object.assign(v,{title:$('#iTitle').value.trim(),category:$('#iCategory').value,description:$('#iDescription').value.trim(),url:$('#iUrl').value.trim(),published:$('#iPublished').checked,status:$('#iPublished').checked?'published':'draft',featured:$('#iFeatured').checked,favorite:$('#iFavorite').checked});if(i==null)s.images.unshift(v);else s.images[i]=v;save(s,false);closeModal();render();};
+}
+
+function renderLeads(s){const statuses=['Novo','Em contato','Proposta enviada','Convertido','Arquivado'];content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Leads</h3><p>Contatos enviados pelo formulário da página inicial.</p></div></div><div class="managerList">${s.leads.map((l,i)=>`<article class="managerItem leadItem"><div class="managerInfo"><div class="managerBadges"><span>${esc(l.service||'CONTATO')}</span></div><h4>${esc(l.name||'Lead')}</h4><p>${esc(l.idea||'')}</p><small>${esc(l.whatsapp||'')} ${l.email?'· '+esc(l.email):''}</small></div><div class="managerActions"><select data-lead-status="${i}">${statuses.map(st=>`<option ${st===l.status?'selected':''}>${st}</option>`).join('')}</select><a class="btn mini" target="_blank" rel="noopener" href="https://wa.me/55${String(l.whatsapp||'').replace(/\D/g,'').replace(/^55/,'')}">WhatsApp</a><button class="danger" data-lead-del="${i}">Excluir</button></div></article>`).join('')||'<div class="emptyState">Nenhum lead recebido ainda.</div>'}</div></div>`;$$('[data-lead-status]').forEach(el=>el.onchange=()=>{s.leads[+el.dataset.leadStatus].status=el.value;save(s)});$$('[data-lead-del]').forEach(el=>el.onclick=()=>{if(confirm('Excluir lead?')){s.leads.splice(+el.dataset.leadDel,1);save(s)}})}
+function renderIdeas(s){content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Ideias & Ofertas</h3><p>Bloco interno para organizar novas ofertas. Nada daqui aparece no site automaticamente.</p></div><button class="btn mini" id="newIdea">+ Nova ideia</button></div><div class="managerList">${s.ideas.map((x,i)=>`<article class="managerItem leadItem"><div class="managerInfo"><h4>${esc(x.title||'Ideia')}</h4><p>${esc(x.text||'')}</p></div><div class="managerActions"><button class="danger" data-idea-del="${i}">Excluir</button></div></article>`).join('')||'<div class="emptyState">Nenhuma ideia cadastrada.</div>'}</div></div>`;$('#newIdea').onclick=()=>{const title=prompt('Título da ideia');if(!title)return;const text=prompt('Descrição da ideia')||'';s.ideas.unshift({id:uid(),title,text});save(s)};$$('[data-idea-del]').forEach(b=>b.onclick=()=>{s.ideas.splice(+b.dataset.ideaDel,1);save(s)})}
+function renderReviews(s){content().innerHTML=`<div class="adminPanel"><div class="panelHead"><div><h3>Avaliações</h3><p>Cadastre e aprove depoimentos para exibição pública.</p></div><button class="btn mini" id="newReview">+ Avaliação</button></div><div class="managerList">${s.reviews.map((r,i)=>`<article class="managerItem leadItem"><div class="managerInfo"><div class="managerBadges"><span class="${r.approved?'ok':'warn'}">${r.approved?'APROVADA':'OCULTA'}</span></div><h4>${esc(r.name||'Cliente')}</h4><p>${esc(r.text||'')}</p></div><div class="managerActions"><button data-review-toggle="${i}">${r.approved?'Ocultar':'Aprovar'}</button><button class="danger" data-review-del="${i}">Excluir</button></div></article>`).join('')||'<div class="emptyState">Nenhuma avaliação.</div>'}</div></div>`;$('#newReview').onclick=()=>{const name=prompt('Nome do cliente');if(!name)return;const text=prompt('Comentário')||'';const role=prompt('Profissão / empresa (opcional)')||'';s.reviews.unshift({id:uid(),name,text,role,rating:5,approved:true});save(s)};$$('[data-review-toggle]').forEach(b=>b.onclick=()=>{const r=s.reviews[+b.dataset.reviewToggle];r.approved=!r.approved;save(s)});$$('[data-review-del]').forEach(b=>b.onclick=()=>{s.reviews.splice(+b.dataset.reviewDel,1);save(s)})}
+function renderSettings(s){const x=s.settings;content().innerHTML=`<div class="settingsGrid"><div class="adminPanel"><h3>Conteúdo principal</h3><div class="editorForm"><label>Headline<input id="setHeroTitle" value="${esc(x.heroTitle)}"></label><label>Texto principal<textarea id="setHeroText" rows="4">${esc(x.heroText)}</textarea></label><label>WhatsApp<input id="setWhatsapp" value="${esc(x.whatsapp)}"></label><label>Telefone<input id="setPhone" value="${esc(x.phone)}"></label><label>Localização<textarea id="setLocation" rows="3">${esc(x.location)}</textarea></label><button class="btn" id="saveSettings">Salvar alterações</button></div></div><div class="adminPanel"><h3>Redes sociais</h3><div class="editorForm"><label>Instagram Caio<input id="setInstagramPersonal" value="${esc(x.instagramPersonal||'')}"></label><label>Instagram Frame X<input id="setInstagramFrameX" value="${esc(x.instagramFrameX||'')}"></label><label>Nome exibido<input id="setSocialLabel" value="${esc(x.socialLabel||'Frame X Studio')}"></label></div><h3>Backup</h3><div class="backupActions"><button class="btn mini ghost" id="exportBackup">Exportar JSON</button><label class="btn mini ghost">Importar JSON<input hidden id="importBackup" type="file" accept="application/json"></label></div></div></div>`;$('#saveSettings').onclick=()=>{Object.assign(s.settings,{heroTitle:$('#setHeroTitle').value,heroText:$('#setHeroText').value,whatsapp:$('#setWhatsapp').value,phone:$('#setPhone').value,location:$('#setLocation').value,instagramPersonal:$('#setInstagramPersonal').value,instagramFrameX:$('#setInstagramFrameX').value,socialLabel:$('#setSocialLabel').value});save(s)};$('#exportBackup').onclick=()=>{const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='frame-x-backup.json';a.click();URL.revokeObjectURL(a.href)};$('#importBackup').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());localStorage.setItem(KEY,JSON.stringify(migrate(data)));render()}catch{alert('Arquivo inválido.')}}}
+
+if(localStorage.getItem(SESSION)==='1') openAdmin(); else authScreen();
