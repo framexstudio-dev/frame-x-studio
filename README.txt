@@ -8,7 +8,7 @@ INFRAESTRUTURA ESPERADA
 
 O QUE MUDA
 - O painel /admin.html usa autenticação online.
-- Login/senha ficam no D1 (hash seguro PBKDF2, nunca senha em texto puro).
+- Login/senha ficam no D1 (hash seguro PBKDF2 SHA-256 com 100.000 iterações, nunca senha em texto puro).
 - Sites, vídeos, imagens, restaurações, leads, avaliações e configurações ficam no D1.
 - Uploads de imagens/vídeos/screenshots ficam no R2.
 - Alterações feitas no admin online aparecem no site público sem editar o GitHub.
@@ -33,6 +33,6 @@ IMPORTANTE
 - Para alterar conteúdo, use o admin. Não precisa fazer novo commit.
 - Para alterar código/design, envie uma nova versão pelo GitHub.
 
-V10.1 AUTH FIX
+V10.2 AUTH FIX
 - Corrige criação do primeiro usuário no D1 usando meta.last_row_id com fallback seguro.
 - Exibe detalhe real do erro da API na tela de autenticação para diagnóstico.
