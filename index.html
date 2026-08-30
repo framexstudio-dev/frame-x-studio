@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Frame X Studio — Experiências Digitais & IA</title>
   <meta name="description" content="Sites, Inteligência Artificial, conteúdo e soluções digitais sob medida.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body><div id="pageLoader" class="pageLoader"><div class="loaderMark"><img src="assets/favicon.png" alt=""><span>FRAME X STUDIO</span></div></div>
   <div class="ambient" aria-hidden="true"></div><div class="gridGlow" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="#inicio"><img src="assets/frame-x-logo.png" alt="Frame X Studio"><span><b>FRAME X</b><small>STUDIO</small></span></a>
-    <nav><a href="#sobre">Sobre</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#videos">Vídeos</a><a href="#imagens">Imagens</a><a href="#modelos">Modelos IA</a><a href="#avaliacoes">Avaliações</a></nav>
+    <nav><a href="#sobre">Sobre</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#videos">Vídeos</a><a href="#imagens">Imagens</a><a href="#restauracao">Restauração</a><a href="#modelos">Modelos IA</a><a href="#avaliacoes">Avaliações</a></nav>
     <a class="btn mini desktop" id="topWhatsapp" target="_blank" rel="noopener">Solicitar orçamento →</a><button class="menu" id="menuBtn" aria-label="Abrir menu">☰</button>
   </header>
 
@@ -33,7 +35,7 @@
         <input name="name" placeholder="Seu nome" required>
         <input name="whatsapp" placeholder="Seu WhatsApp" required>
         <input name="email" type="email" placeholder="Seu e-mail">
-        <select name="service"><option>Site</option><option>Landing Page</option><option>Vídeo com IA</option><option>Modelo Virtual / TikTok Shop</option><option>Imagem com IA</option><option>Automação</option><option>Outro</option></select>
+        <select name="service"><option>Site</option><option>Landing Page</option><option>Vídeo com IA</option><option>Modelo Virtual / TikTok Shop</option><option>Imagem com IA</option><option>Restauração de Fotos</option><option>Automação</option><option>Outro</option></select>
         <textarea name="idea" placeholder="Descreva sua ideia em poucas palavras" required></textarea>
         <button class="btn" type="submit">Quero tirar essa ideia do papel →</button>
       </form>
@@ -51,6 +53,15 @@
 
     <section id="imagens" class="section imagesSection"><div class="wrap reveal"><div class="sectionHead"><div><span class="eyebrow">CRIATIVIDADE VISUAL</span><h2>Imagens que <em>chamam atenção.</em></h2></div><p>Galeria em movimento com foco central e navegação por swipe.</p></div><div class="coverflow imageFlow" id="imageCoverflow"><button class="navArrow prev" aria-label="Anterior">‹</button><div class="coverflowTrack" id="imageTrack"></div><button class="navArrow next" aria-label="Próximo">›</button></div><div id="emptyImages" class="emptyState">As imagens cadastradas no painel aparecerão aqui.</div><div class="center"><a href="#contato" class="textLink contextual">Quero imagens assim →</a></div></div></section>
 
+    <section id="restauracao" class="section restorationSection">
+      <div class="wrap reveal">
+        <div class="sectionHead"><div><span class="eyebrow">RESTAURAÇÃO DE FOTOS</span><h2>Memórias antigas.<br><em>Detalhes recuperados.</em></h2></div><p>Arraste o divisor com o mouse ou com o dedo para comparar o antes e o depois da restauração.</p></div>
+        <div class="restorationGrid" id="restorationGrid"></div>
+        <div id="emptyRestorations" class="emptyState">As restaurações cadastradas no painel aparecerão aqui.</div>
+        <div class="center"><a href="#lead-rapido" class="textLink contextual">Quero restaurar uma foto →</a></div>
+      </div>
+    </section>
+
     <section id="modelos" class="section wrap modelSection reveal"><div class="modelCard glass"><div><span class="eyebrow">MODELOS VIRTUAIS</span><h2>Nós criamos a sua <em>modelo para TikTok Shop.</em></h2><p>Personagens e modelos virtuais com identidade própria para apresentar produtos, produzir conteúdo e criar presença consistente sem depender de gravações tradicionais.</p><ul><li>Identidade visual consistente</li><li>Vídeos e criativos em escala</li><li>Conteúdo pensado para produto</li></ul><a class="btn" id="modelWhatsapp" target="_blank" rel="noopener">Quero minha modelo virtual →</a></div><div class="modelVisual"><div class="modelBadge">AI MODEL</div><div class="xMark small">X</div></div></div></section>
 
     <section class="section statement"><div class="wrap reveal"><span class="eyebrow">NOSSA VISÃO</span><h2>Tecnologia não precisa<br>ser <em>inacessível.</em></h2><p>Soluções sob medida, investimento inteligente e qualidade visual para diferentes momentos do seu negócio.</p><a class="btn" href="#lead-rapido">Conte sua ideia →</a></div></section>
@@ -64,6 +75,7 @@
 
   <footer><div class="wrap footer"><div class="brand"><img src="assets/frame-x-logo.png" alt="Frame X Studio"><span><b>FRAME X</b><small>STUDIO</small></span></div><p>Criatividade, tecnologia e IA transformando ideias em experiências digitais.</p><div class="footerSocials" id="footerSocials"></div><small>© Frame X Studio. Todos os direitos reservados.</small></div></footer>
 
+  <a id="floatingWhatsapp" class="floatingWhatsapp" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">WhatsApp <span>↗</span></a>
   <div id="toast" class="toast"></div><div id="lightbox" class="lightbox hidden"><button class="lightboxClose" aria-label="Fechar">×</button><div id="lightboxContent"></div></div>
   <script src="app.js"></script>
 </body></html>
