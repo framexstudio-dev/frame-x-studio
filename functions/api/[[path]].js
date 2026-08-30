@@ -107,10 +107,14 @@ async function handleAuth(parts, request, env) {
     const passHash = await passwordHash(password, salt);
     let userId;
     if (!configured) {
-      const r = await env.DB.prepare('INSERT INTO admin_users (username, salt, pass_hash, created_at) VALUES (?, ?, ?, ?)')
+      const insertResult = await env.DB.prepare('INSERT INTO admin_users (username, salt, pass_hash, created_at) VALUES (?, ?, ?, ?)')
         .bind(username, salt, passHash, new Date().toISOString()).run();
-      const urow = await env.DB.prepare('SELECT id FROM admin_users WHERE username = ?').bind(username).first();
-      userId = urow.id;
+      userId = Number(insertResult?.meta?.last_row_id || 0);
+      if (!userId) {
+        const urow = await env.DB.prepare('SELECT id FROM admin_users WHERE username = ?').bind(username).first();
+        userId = Number(urow?.id || 0);
+      }
+      if (!userId) return json({ ok: false, error: 'Não foi possível criar o usuário administrativo.', detail: 'Usuário inserido sem ID retornado pelo D1.' }, 500);
     } else {
       userId = session.user_id;
       await env.DB.prepare('UPDATE admin_users SET username = ?, salt = ?, pass_hash = ? WHERE id = ?')

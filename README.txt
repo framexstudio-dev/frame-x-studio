@@ -32,3 +32,7 @@ Se houver conteúdo salvo no localStorage desse MESMO domínio, o painel tenta m
 IMPORTANTE
 - Para alterar conteúdo, use o admin. Não precisa fazer novo commit.
 - Para alterar código/design, envie uma nova versão pelo GitHub.
+
+V10.1 AUTH FIX
+- Corrige criação do primeiro usuário no D1 usando meta.last_row_id com fallback seguro.
+- Exibe detalhe real do erro da API na tela de autenticação para diagnóstico.

@@ -72,7 +72,7 @@ function authScreen(mode='login',configured=true){
  $('#authForm').onsubmit=async e=>{e.preventDefault();const u=$('#authUser').value.trim(),p=$('#authPass').value,msg=$('#authMsg');msg.textContent='Aguarde...';
   if(mode==='register'&&p!==$('#authPass2').value){msg.textContent='As senhas não coincidem.';return}
   const endpoint=mode==='register'?'/api/auth/register':'/api/auth/login';
-  try{const r=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({username:u,password:p})});const j=await r.json();if(!r.ok)throw new Error(j.error||'Não foi possível entrar.');await openAdmin();}
+  try{const r=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({username:u,password:p})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error([j.error,j.detail].filter(Boolean).join(' — ')||'Não foi possível entrar.');await openAdmin();}
   catch(err){msg.textContent=err.message}
  };
 }
