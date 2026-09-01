@@ -12,3 +12,11 @@ MEDIA = frame-x-media
 
 Suba todos os arquivos e pastas para a raiz do repositório GitHub, inclusive functions/ e _routes.json.
 A Cloudflare conectada ao GitHub fará o deploy automaticamente.
+
+
+V13 - Portfolio Controls
+- Tamanho de cards de sites controlado pelo admin: Compacto, Padrao, Amplo e Vitrine.
+- Destaque/prioridade nao altera mais o tamanho do card.
+- Categoria roxa removida dos cards de video; fica somente o titulo.
+- CTA dos videos abre WhatsApp diretamente com mensagem contextual.
+- Botao 'Falar comigo' alterado para 'Fale conosco'.

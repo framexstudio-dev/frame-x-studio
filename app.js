@@ -1,9 +1,9 @@
 let STATE=null;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const defaults={projects:[],videos:[],images:[],restorations:[],reviews:[],leads:[],ideas:[],campaigns:[],settings:{whatsapp:'5521989784737',phone:'(21) 98978-4737',location:'Todos os Santos\nRio de Janeiro — RJ',socialLabel:'Frame X Studio',instagramFrameX:'https://www.instagram.com/framexstudio.ai/',sectionOrder:['sobre','servicos','projetos','videos','imagens','restauracao','modelos','processo','visao','stats','avaliacoes','contato'],hiddenSections:[],heroTitle:'Ideias que viram experiências digitais.',heroText:'Sites, Inteligência Artificial, conteúdo e soluções digitais criadas com estratégia, tecnologia e atenção aos detalhes.'}};
+const defaults={projects:[],videos:[],images:[],restorations:[],reviews:[],leads:[],ideas:[],campaigns:[],settings:{whatsapp:'5521989784737',phone:'(21) 98978-4737',location:'Todos os Santos\nRio de Janeiro — RJ',socialLabel:'Frame X Studio',instagramFrameX:'https://www.instagram.com/framexstudio.ai/',sectionOrder:['sobre','servicos','projetos','videos','imagens','restauracao','modelos','processo','visao','stats','avaliacoes','contato'],defaultProjectCardSize:'half',hiddenSections:[],heroTitle:'Ideias que viram experiências digitais.',heroText:'Sites, Inteligência Artificial, conteúdo e soluções digitais criadas com estratégia, tecnologia e atenção aos detalhes.'}};
 const clone=v=>JSON.parse(JSON.stringify(v));
 const esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function normalizeItem(x,i){const previewMode=x.previewMode==='auto'?'live':(x.previewMode||'live');return {...x,previewMode,ratio:x.ratio||'vertical',published:x.published!==false,status:x.status||((x.published!==false)?'published':'draft'),featured:!!x.featured,favorite:!!x.favorite,order:x.order??i};}
+function normalizeItem(x,i){const previewMode=x.previewMode==='auto'?'live':(x.previewMode||'live');return {...x,previewMode,ratio:x.ratio||'vertical',cardSize:x.cardSize||'auto',published:x.published!==false,status:x.status||((x.published!==false)?'published':'draft'),featured:!!x.featured,favorite:!!x.favorite,order:x.order??i};}
 function migrate(raw){const d=clone(defaults);if(!raw)return d;for(const k of ['projects','videos','images','restorations','reviews','leads','ideas','campaigns'])if(Array.isArray(raw[k]))d[k]=raw[k];if(Array.isArray(raw.media)){d.videos=raw.media.filter(x=>x.type==='video');d.images=raw.media.filter(x=>x.type==='image')}d.settings={...d.settings,...(raw.settings||{})};d.projects=d.projects.map(normalizeItem);d.videos=d.videos.map(normalizeItem);d.images=d.images.map(normalizeItem);d.restorations=d.restorations.map(normalizeItem);return d}
 function load(){return STATE||migrate(null)}
 async function loadRemote(){
@@ -37,14 +37,15 @@ async function renderProjects(s){
      const live=/^https?:\/\//i.test(p.url||'')?p.url:'';
      media=live?`<iframe class="siteFrame" src="${esc(live)}" title="Prévia ao vivo de ${esc(p.name)}" loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerpolicy="no-referrer-when-downgrade"></iframe>`:`<div class="previewMissing"><b>Link inválido</b><span>Informe uma URL completa no painel.</span></div>`;
    }
-   cards.push(`<article class="project ${p.featured?'featured':''}"><div class="browser"><div class="browserbar"><i></i><i></i><i></i><span>FRAME X · PROJETO</span></div><div class="screen ${mode==='live'?'liveScreen':''}">${media}<a class="viewSiteOverlay" href="${esc(p.url||'#')}" target="_blank" rel="noopener">VER SITE ↗</a></div></div><div class="projectInfo"><div><span>${esc(p.category||'Projeto')}</span><h3>${esc(p.name||'Projeto')}</h3><p>${esc(p.description||'')}</p></div><a class="roundArrow" href="${esc(p.url||'#')}" target="_blank" rel="noopener">↗</a></div></article>`)
+   const rawSize=p.cardSize||'auto',legacy={compact:'third',standard:'half',wide:'twoThirds',showcase:'full'},resolvedSize=rawSize==='auto'?(s.settings.defaultProjectCardSize||'half'):(legacy[rawSize]||rawSize);
+   cards.push(`<article class="project size-${esc(resolvedSize)} ${p.featured?'featured':''}"><div class="browser"><div class="browserbar"><i></i><i></i><i></i><span>FRAME X · PROJETO</span></div><div class="screen ${mode==='live'?'liveScreen':''}">${media}<a class="viewSiteOverlay" href="${esc(p.url||'#')}" target="_blank" rel="noopener">VER SITE ↗</a></div></div><div class="projectInfo"><div><span>${esc(p.category||'Projeto')}</span><h3>${esc(p.name||'Projeto')}</h3><p>${esc(p.description||'')}</p></div><a class="roundArrow" href="${esc(p.url||'#')}" target="_blank" rel="noopener">↗</a></div></article>`)
  }
  grid.innerHTML=cards.join('');$('#emptyProjects').classList.toggle('hidden',!!all.length);$('#moreProjects').style.display=all.length>projectLimit?'inline-flex':'none';
 }
-async function buildVideo(v){const src=await assetSrc(v),ratio=v.ratio||'vertical',yt=youtubeId(v.url||'');const cta=esc(v.ctaText||'Fale com a gente agora'),target=esc(v.ctaTarget||'contact'),title=esc(v.title||v.category||'Vídeo com IA'),category=esc(v.category||'VÍDEO COM IA');
- const header=`<div class="videoServiceHead"><div><small>${category}</small><h3>${title}</h3></div><button class="videoCardCta" data-video-cta="${target}">${cta} ↗</button></div>`;
+async function buildVideo(v){const src=await assetSrc(v),ratio=v.ratio||'vertical',yt=youtubeId(v.url||'');const cta=esc(v.ctaText||'Fale conosco agora'),title=esc(v.title||v.category||'Vídeo com IA');
+ const header=`<div class="videoServiceHead"><h3>${title}</h3><button class="videoCardCta" data-video-cta data-video-title="${title}">${cta} ↗</button></div>`;
  if(yt){return `<article class="coverItem ratio-${esc(ratio)} videoCard" data-youtube="${esc(yt)}" data-title="${title}">${header}<div class="coverMedia"><img src="https://i.ytimg.com/vi/${esc(yt)}/hqdefault.jpg" alt="Miniatura de ${title}" loading="lazy"><span class="videoPreviewBadge">▶ VER VÍDEO</span></div></article>`}
- return `<article class="coverItem ratio-${esc(ratio)} videoCard" data-src="${esc(src)}" data-title="${title}">${header}<div class="coverMedia">${src?`<video src="${esc(src)}" muted loop preload="metadata" playsinline></video><span class="videoPreviewBadge">▶ ABRIR PLAYER</span>`:'<div class="emptyState">Sem mídia</div>'}</div></article>`
+ return `<article class="coverItem ratio-${esc(ratio)} videoCard" data-src="${esc(src)}" data-title="${title}">${header}<div class="coverMedia">${src?`<video src="${esc(src)}" muted loop preload="metadata" playsinline></video><span class="videoPreviewBadge">▶ ABRIR PLAYER</span><button class="videoVolumeBtn" type="button" data-video-volume aria-label="Ativar som" title="Ativar som">🔇</button>`:'<div class="emptyState">Sem mídia</div>'}</div></article>`
 }
 async function renderVideos(s){
  const list=s.videos.filter(v=>v.published!==false&&v.status!=='draft').sort((a,b)=>(Number(b.featured)-Number(a.featured))||((a.order||0)-(b.order||0)));$('#emptyVideos').style.display=list.length?'none':'block';if(!list.length){$('#videoTrack').innerHTML='';return}videoIndex=Math.min(videoIndex,list.length-1);const html=[];for(const v of list)html.push(await buildVideo(v));$('#videoTrack').innerHTML=html.join('');setupCoverflow('video',list.length);setupVideoPreviews();
@@ -64,9 +65,12 @@ function setupCompareSliders(){$$('.compareWrap').forEach(el=>{let active=false;
 function setupVideoPreviews(){const hoverOK=matchMedia('(hover:hover)').matches;
  $$('#videoTrack .videoCard').forEach(card=>{
    const video=card.querySelector('video');
-   if(video&&hoverOK){card.addEventListener('mouseenter',()=>{video.currentTime=0;video.play().catch(()=>{})});card.addEventListener('mouseleave',()=>{video.pause();video.currentTime=0})}
-   const cta=card.querySelector('[data-video-cta]');if(cta)cta.onclick=e=>{e.stopPropagation();const target=cta.dataset.videoCta;if(target==='whatsapp')document.querySelector('#floatingWhatsapp')?.click();else document.querySelector('#lead-rapido')?.scrollIntoView({behavior:'smooth'})};
-   card.onclick=e=>{if(e.target.closest('[data-video-cta]'))return;openVideo(card.dataset.src||'',card.dataset.youtube||'',card.dataset.title||'Vídeo')}
+   if(video){video.muted=true;video.volume=.45;}
+   if(video&&hoverOK){card.addEventListener('mouseenter',()=>{if(video.paused){video.currentTime=0;video.play().catch(()=>{})}});card.addEventListener('mouseleave',()=>{video.pause();video.currentTime=0})}
+   const volumeBtn=card.querySelector('[data-video-volume]');
+   if(volumeBtn&&video){volumeBtn.onclick=e=>{e.stopPropagation();video.volume=.45;video.muted=!video.muted;volumeBtn.textContent=video.muted?'🔇':'🔊';volumeBtn.setAttribute('aria-label',video.muted?'Ativar som':'Silenciar');volumeBtn.title=video.muted?'Ativar som':'Silenciar';if(!video.muted)video.play().catch(()=>{});};}
+   const cta=card.querySelector('[data-video-cta]');if(cta)cta.onclick=e=>{e.stopPropagation();const title=cta.dataset.videoTitle||card.dataset.title||'este serviço';const number=load().settings.whatsapp||defaults.settings.whatsapp;const msg=`Olá! Vi o vídeo "${title}" no site da Frame X Studio e gostaria de saber mais.`;window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`,'_blank','noopener')};
+   card.onclick=e=>{if(e.target.closest('[data-video-cta],[data-video-volume]'))return;openVideo(card.dataset.src||'',card.dataset.youtube||'',card.dataset.title||'Vídeo')}
  })
 }
 function openVideo(src,youtube,title){

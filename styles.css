@@ -63,3 +63,89 @@
 .adminHeaderActions #homePreviewBtn{white-space:nowrap;text-decoration:none}
 @media(max-width:900px){.homePreviewFrameWrap{height:600px;min-height:420px}.adminHeaderActions #homePreviewBtn{display:none}}
 @media(max-width:640px){.homePreviewFrameWrap{height:520px;min-height:380px;border-radius:16px}}
+
+
+/* V13 — controles de portfólio, vídeo limpo e CTA direto */
+/* Portfólio em grade de 12 colunas: tamanho é controlado pelo admin e não depende de destaque. */
+.projectGrid{grid-template-columns:repeat(12,minmax(0,1fr));align-items:start}
+.project{grid-column:span 6;min-width:0}
+.project.size-compact{grid-column:span 4}
+.project.size-standard{grid-column:span 6}
+.project.size-wide{grid-column:span 8}
+.project.size-showcase{grid-column:1/-1}
+.project.featured{grid-column:auto}
+.project.featured.size-compact{grid-column:span 4}
+.project.featured.size-standard{grid-column:span 6}
+.project.featured.size-wide{grid-column:span 8}
+.project.featured.size-showcase{grid-column:1/-1}
+.project .screen{height:clamp(320px,38vw,500px)}
+.project.size-compact .screen{height:clamp(290px,31vw,410px)}
+.project.size-wide .screen{height:clamp(350px,42vw,540px)}
+.project.size-showcase .screen{height:clamp(400px,48vw,620px)}
+.project:hover .screen img,.project.featured:hover .screen img{transform:translateY(calc(-100% + var(--preview-h,500px)))}
+.project.size-compact{--preview-h:410px}.project.size-standard{--preview-h:500px}.project.size-wide{--preview-h:540px}.project.size-showcase{--preview-h:620px}
+.project.size-compact .projectInfo h3{font-size:21px}.project.size-showcase .projectInfo h3{font-size:28px}
+
+/* Vídeo: exibe somente o título definido no admin + CTA. Categoria fica apenas no painel. */
+.videoServiceHead{align-items:center;min-height:64px;padding:2px 2px 14px}
+.videoServiceHead>div{display:contents}
+.videoServiceHead small{display:none!important}
+.videoServiceHead h3{font-size:clamp(18px,1.8vw,24px);line-height:1.08;max-width:min(62%,300px);margin:0;overflow-wrap:anywhere}
+.videoCardCta{flex:0 0 auto;max-width:44%;white-space:normal;text-align:center;line-height:1.2}
+.coverItem:not(.active) .videoServiceHead{opacity:.58}
+
+@media(max-width:980px){
+ .project.size-compact{grid-column:span 6}.project.size-standard,.project.size-wide,.project.size-showcase{grid-column:1/-1}
+ .project.featured.size-compact{grid-column:span 6}.project.featured.size-standard,.project.featured.size-wide,.project.featured.size-showcase{grid-column:1/-1}
+ .project .screen,.project.size-compact .screen,.project.size-wide .screen,.project.size-showcase .screen{height:430px}
+ .project:hover .screen img,.project.featured:hover .screen img{transform:none}
+ .videoServiceHead h3{max-width:60%}
+}
+@media(max-width:640px){
+ .projectGrid{grid-template-columns:1fr}.project,.project.size-compact,.project.size-standard,.project.size-wide,.project.size-showcase,.project.featured.size-compact,.project.featured.size-standard,.project.featured.size-wide,.project.featured.size-showcase{grid-column:1/-1}
+ .project .screen,.project.size-compact .screen,.project.size-wide .screen,.project.size-showcase .screen{height:min(92vw,390px)}
+ .videoServiceHead{min-height:58px;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+ .videoServiceHead h3{max-width:none;font-size:17px}
+ .videoCardCta{max-width:128px;padding:8px 10px;font-size:8px}
+}
+
+
+/* V14 — flexible portfolio mosaic + inline video audio */
+.project.size-quarter{grid-column:span 3}
+.project.size-third{grid-column:span 4}
+.project.size-five{grid-column:span 5}
+.project.size-half{grid-column:span 6}
+.project.size-seven{grid-column:span 7}
+.project.size-twoThirds{grid-column:span 8}
+.project.size-threeQuarters{grid-column:span 9}
+.project.size-full{grid-column:1/-1}
+.project.featured.size-quarter{grid-column:span 3}
+.project.featured.size-third{grid-column:span 4}
+.project.featured.size-five{grid-column:span 5}
+.project.featured.size-half{grid-column:span 6}
+.project.featured.size-seven{grid-column:span 7}
+.project.featured.size-twoThirds{grid-column:span 8}
+.project.featured.size-threeQuarters{grid-column:span 9}
+.project.featured.size-full{grid-column:1/-1}
+.project.size-quarter .screen{height:clamp(260px,27vw,380px)}
+.project.size-third .screen{height:clamp(290px,31vw,410px)}
+.project.size-five .screen{height:clamp(310px,34vw,450px)}
+.project.size-half .screen{height:clamp(320px,38vw,500px)}
+.project.size-seven .screen{height:clamp(340px,40vw,520px)}
+.project.size-twoThirds .screen{height:clamp(350px,42vw,540px)}
+.project.size-threeQuarters .screen{height:clamp(370px,45vw,570px)}
+.project.size-full .screen{height:clamp(400px,48vw,620px)}
+.videoVolumeBtn{position:absolute;right:14px;bottom:14px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;display:grid;place-items:center;background:rgba(10,10,15,.76);backdrop-filter:blur(10px);color:#fff;font-size:17px;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.2);transition:.2s ease}
+.videoVolumeBtn:hover{transform:scale(1.06);background:rgba(116,82,255,.92)}
+@media(max-width:980px){
+ .project.size-quarter,.project.size-third{grid-column:span 6}
+ .project.size-five,.project.size-half,.project.size-seven,.project.size-twoThirds,.project.size-threeQuarters,.project.size-full{grid-column:1/-1}
+ .project.featured.size-quarter,.project.featured.size-third{grid-column:span 6}
+ .project.featured.size-five,.project.featured.size-half,.project.featured.size-seven,.project.featured.size-twoThirds,.project.featured.size-threeQuarters,.project.featured.size-full{grid-column:1/-1}
+}
+@media(max-width:640px){
+ .project.size-quarter,.project.size-third,.project.size-five,.project.size-half,.project.size-seven,.project.size-twoThirds,.project.size-threeQuarters,.project.size-full,
+ .project.featured.size-quarter,.project.featured.size-third,.project.featured.size-five,.project.featured.size-half,.project.featured.size-seven,.project.featured.size-twoThirds,.project.featured.size-threeQuarters,.project.featured.size-full{grid-column:1/-1}
+ .project.size-quarter .screen,.project.size-third .screen,.project.size-five .screen,.project.size-half .screen,.project.size-seven .screen,.project.size-twoThirds .screen,.project.size-threeQuarters .screen,.project.size-full .screen{height:min(92vw,390px)}
+ .videoVolumeBtn{right:10px;bottom:10px;width:38px;height:38px}
+}
