@@ -13,7 +13,7 @@
   <div class="ambient" aria-hidden="true"></div><div class="gridGlow" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="#inicio"><img src="assets/frame-x-logo.png" alt="Frame X Studio"><span><b>FRAME X</b><small>STUDIO</small></span></a>
-    <nav><a href="#sobre">Sobre</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#videos">Vídeos</a><a href="#imagens">Imagens</a><a href="#restauracao">Restauração</a><a href="#modelos">Modelos IA</a><a href="#avaliacoes">Avaliações</a></nav>
+    <nav><a href="#sobre">Sobre</a><a href="#servicos">Serviços</a><a href="#projetos">Projetos</a><a href="#videos">Vídeos</a><a href="#imagens">Imagens</a><a href="#restauracao">Restauração</a><a href="#modelos">Modelos IA</a><a href="#prova">Prova social</a><a href="#avaliacoes">Avaliações</a></nav>
     <a class="btn mini desktop" id="topWhatsapp" target="_blank" rel="noopener">Solicitar orçamento →</a><button class="menu" id="menuBtn" aria-label="Abrir menu">☰</button>
   </header>
 
@@ -37,6 +37,10 @@
         <input name="email" type="email" placeholder="Seu e-mail">
         <select name="service"><option>Site</option><option>Landing Page</option><option>Vídeo com IA</option><option>Modelo Virtual / TikTok Shop</option><option>Imagem com IA</option><option>Restauração de Fotos</option><option>Automação</option><option>Outro</option></select>
         <textarea name="idea" placeholder="Descreva sua ideia em poucas palavras" required></textarea>
+        <div class="socialLeadBox span2">
+          <div class="socialLeadHead"><div><b>Suas redes sociais</b><small>Opcional — ajuda a gente a entender melhor sua presença digital.</small></div><button type="button" class="socialAddBtn" id="addSocialRow">+ Adicionar rede</button></div>
+          <div id="socialRows" class="socialRows"></div>
+        </div>
         <button class="btn" type="submit">Quero tirar essa ideia do papel →</button>
       </form>
     </section>
@@ -46,6 +50,13 @@
     <section data-section-key="sobre" id="sobre" class="section wrap split reveal"><div><span class="eyebrow">POR TRÁS DA FRAME X</span><h2>Capricho não é detalhe.<br><em>É parte do produto.</em></h2></div><div class="copy"><p>A Frame X Studio transforma boas ideias em experiências digitais profissionais — sem transformar presença digital em um investimento inacessível.</p><p>À frente do estúdio, <b>Caio Cavalcante</b> une criação digital, tecnologia e Inteligência Artificial para desenvolver soluções personalizadas, bonitas e funcionais.</p><a href="#contato" class="textLink">Conte sua ideia →</a></div></section>
 
     <section data-section-key="servicos" id="servicos" class="section wrap reveal"><div class="sectionHead"><div><span class="eyebrow">O QUE FAZEMOS</span><h2>Do conceito à <em>execução.</em></h2></div><p>Um estúdio digital para quem quer presença, tecnologia e conteúdo com identidade.</p></div><div class="serviceGrid"><article class="service glass"><div><span>01</span>◈</div><h3>Web & Experiências</h3><p>Sites, landing pages, páginas comerciais e soluções web personalizadas.</p></article><article class="service glass"><div><span>02</span>✦</div><h3>Inteligência Artificial</h3><p>Vídeos, imagens, avatares, modelos virtuais, publicidade e soluções com IA.</p></article><article class="service glass"><div><span>03</span>◎</div><h3>Automação</h3><p>Fluxos e soluções inteligentes para reduzir trabalho manual e ganhar eficiência.</p></article><article class="service glass"><div><span>04</span>▶</div><h3>Marketing & Conteúdo</h3><p>Conteúdo para redes sociais, criativos publicitários e presença digital.</p></article></div></section>
+
+    <section data-section-key="acessivel" id="acessivel" class="section entrepreneurSection">
+      <div class="wrap reveal entrepreneurInner">
+        <div><span class="eyebrow lightEyebrow">CRIADO PARA QUEM EMPREENDE</span><h2>Solução profissional não precisa ter <em>preço inacessível.</em></h2></div>
+        <div><p>Sites, IA, vídeos, criativos e automações pensados para pequenos negócios, profissionais e marcas que querem crescer com qualidade sem assumir custos absurdos.</p><div class="entrepreneurPills"><span>Orçamento sob medida</span><span>Soluções acessíveis</span><span>Sem pacote engessado</span></div><a href="#lead-rapido" class="btn light">Conte o que você precisa →</a></div>
+      </div>
+    </section>
 
     <section data-section-key="projetos" id="projetos" class="section projects"><div class="wrap"><div class="sectionHead"><div><span class="eyebrow">PORTFÓLIO</span><h2>Projetos que saíram<br>da ideia para a <em>tela.</em></h2></div><p>Passe o mouse pela prévia e clique em “Ver site”.</p></div><div class="portfolioFilters" id="projectFilters"></div><div class="projectGrid" id="projectGrid"></div><div id="emptyProjects" class="emptyState hidden">Nenhum projeto publicado ainda.</div><div class="center"><button class="btn ghost" id="moreProjects">Ver mais projetos</button></div></div></section>
 
@@ -68,9 +79,13 @@
 
     <section data-section-key="stats" class="section wrap reveal" id="stats"><div class="statsGrid"><div><b data-count="12">0</b><span>Possibilidades digitais</span></div><div><b data-count="7">0</b><span>Frentes de criação</span></div><div><b data-count="100">0</b><span>% responsivo</span></div></div></section>
 
+    <section data-section-key="prova" id="prova" class="section proofSection">
+      <div class="wrap reveal"><div class="sectionHead"><div><span class="eyebrow">PROVA SOCIAL</span><h2>Trabalho que dá para <em>ver.</em></h2></div><p>Resultados, bastidores, prints de clientes, publicações e vídeos reais do nosso trabalho.</p></div><div class="proofGrid" id="proofGrid"></div><div id="emptyProof" class="emptyState">As provas sociais publicadas no painel aparecerão aqui.</div></div>
+    </section>
+
     <section data-section-key="processo" id="processo" class="section wrap processSection reveal"><div class="sectionHead"><div><span class="eyebrow">SIMPLES DE COMEÇAR</span><h2>Da sua ideia<br><em>até a entrega.</em></h2></div><p>Sem complicação: entendemos o que você precisa e transformamos isso em uma solução digital com identidade.</p></div><div class="processGrid"><article><span>01</span><h3>Você conta a ideia</h3><p>Explique seu objetivo, produto ou serviço em poucos minutos.</p></article><article><span>02</span><h3>A gente direciona</h3><p>Definimos a melhor solução e o formato ideal para o seu projeto.</p></article><article><span>03</span><h3>Você vê ganhar forma</h3><p>Criação, ajustes e entrega com foco em qualidade e apresentação profissional.</p></article></div></section>
 
-    <section data-section-key="avaliacoes" id="avaliacoes" class="section wrap reveal"><div class="sectionHead"><div><span class="eyebrow">PROVA SOCIAL</span><h2>Quem trabalha com<br>a <em>Frame X.</em></h2></div></div><div class="reviewGrid" id="reviewGrid"></div></section>
+    <section data-section-key="avaliacoes" id="avaliacoes" class="section reviewsSection"><div class="wrap reveal"><div class="sectionHead"><div><span class="eyebrow">AVALIAÇÕES</span><h2>A experiência de quem<br><em>fez com a gente.</em></h2></div><p>Feedbacks aprovados de clientes. Quer deixar o seu? Você também pode avaliar por aqui.</p></div><div class="reviewGrid" id="reviewGrid"></div><div class="reviewSubmitCard glass"><div><span class="eyebrow">DEIXE SUA AVALIAÇÃO</span><h3>Como foi sua experiência?</h3><p>Sua avaliação fica pendente até aprovação. A foto é opcional e você pode ajustar o enquadramento antes de enviar.</p></div><form id="reviewForm" class="reviewForm"><div class="reviewPhotoPicker"><button type="button" id="pickReviewPhoto" class="reviewAvatarPreview" aria-label="Adicionar foto"><span id="reviewAvatarInitial">+</span><img id="reviewAvatarImg" alt="Prévia da foto"></button><div><b>Foto do cliente</b><small>Opcional · formato final 1:1</small><input id="reviewPhotoInput" type="file" accept="image/*" hidden></div></div><input name="name" placeholder="Seu nome" required><div class="starPicker" aria-label="Sua nota"><button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button><input type="hidden" name="rating" value="5"></div><textarea name="text" placeholder="Conte rapidamente como foi sua experiência" required></textarea><button class="btn" type="submit">Enviar avaliação →</button></form></div></div></section>
 
     <section data-section-key="contato" id="contato" class="section wrap reveal"><div class="contact"><div><span class="eyebrow">VAMOS CONVERSAR</span><h2>Tem uma ideia?<br><em>Vamos tirar do papel.</em></h2><p>Conte o que você precisa. A Frame X pensa na solução certa para o seu projeto e para o momento do seu negócio.</p><a class="btn light" id="contactWhatsapp" target="_blank" rel="noopener">Falar no WhatsApp</a></div><div class="contactMeta"><div>⌖<span><small>LOCALIZAÇÃO</small><span id="contactLocation">Todos os Santos<br>Rio de Janeiro — RJ</span></span></div><div>◉<span><small>WHATSAPP</small><span id="contactPhone">(21) 98978-4737</span></span></div><div>◎<span><small>REDES SOCIAIS</small><span id="contactSocial">Frame X Studio</span><div class="socialLinks" id="socialLinks"></div></span></div></div></div></section>
   </main>
@@ -79,5 +94,6 @@
 
   <a id="floatingWhatsapp" class="floatingWhatsapp" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">WhatsApp <span>↗</span></a>
   <div id="toast" class="toast"></div><div id="lightbox" class="lightbox hidden"><button class="lightboxClose" aria-label="Fechar">×</button><div id="lightboxContent"></div></div>
+  <div id="cropModal" class="cropModal hidden"><div class="cropDialog"><div class="cropHead"><div><small>AJUSTAR FOTO</small><h3>Enquadre seu avatar</h3></div><button type="button" id="closeCrop">×</button></div><div class="cropStage"><canvas id="cropCanvas" width="520" height="520"></canvas><div class="cropGuide"></div></div><label class="zoomControl">Zoom<input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1"></label><div class="cropActions"><button type="button" class="btn ghost" id="cancelCrop">Cancelar</button><button type="button" class="btn" id="applyCrop">Usar esta foto</button></div></div></div>
   <script src="app.js"></script>
 </body></html>

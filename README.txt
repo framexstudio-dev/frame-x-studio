@@ -1,22 +1,16 @@
-FRAME X STUDIO — V12 LIVE PREVIEW
+FRAME X STUDIO — V15 PROVA SOCIAL + AVALIAÇÕES
 
-NOVIDADE PRINCIPAL
-- Prévia da Home dentro do painel administrativo em Site & Configurações.
-- Botão “Prévia da home” no topo do admin para abrir o site em nova aba.
+Principais novidades:
+- Nova seção Prova Social para prints, imagens e vídeos, gerenciada no admin.
+- Avaliações públicas com 1 a 5 estrelas, nome, rótulo Cliente e foto opcional.
+- Editor de foto 1:1 com zoom e reposicionamento antes do envio.
+- Avaliações enviadas entram como pendentes e precisam ser aprovadas no admin.
+- Formulário de lead com redes sociais opcionais e seletor sem redes duplicadas.
+- Nova faixa escura destacando soluções acessíveis pensadas para empreendedores.
+- Espaçamento vertical entre seções reduzido e refinado.
+- Correção do carrossel para não rolar a página automaticamente ao entrar no site.
+- Backup: download/restauração JSON + ponto de restauração local no navegador.
+- Mantidos: mosaico flexível de portfólio, player de vídeo, volume inline, D1 e R2.
 
-DEPLOY
-Este projeto usa Cloudflare Pages + D1 + R2.
-Bindings esperados:
-DB = frame-x-db
-MEDIA = frame-x-media
-
-Suba todos os arquivos e pastas para a raiz do repositório GitHub, inclusive functions/ e _routes.json.
-A Cloudflare conectada ao GitHub fará o deploy automaticamente.
-
-
-V13 - Portfolio Controls
-- Tamanho de cards de sites controlado pelo admin: Compacto, Padrao, Amplo e Vitrine.
-- Destaque/prioridade nao altera mais o tamanho do card.
-- Categoria roxa removida dos cards de video; fica somente o titulo.
-- CTA dos videos abre WhatsApp diretamente com mensagem contextual.
-- Botao 'Falar comigo' alterado para 'Fale conosco'.
+Deploy: substitua os arquivos no mesmo repositório GitHub conectado ao Cloudflare Pages.
+Bindings necessários: D1 = DB e R2 = MEDIA.

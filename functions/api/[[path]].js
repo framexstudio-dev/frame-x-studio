@@ -177,7 +177,7 @@ async function handleLead(request, env) {
   const body = await readJson(request);
   if (!body) return json({ ok: false, error: 'Dados inválidos.' }, 400);
   const row = await env.DB.prepare('SELECT data FROM site_state WHERE id = 1').first();
-  let state = row?.data ? JSON.parse(row.data) : { projects: [], videos: [], images: [], restorations: [], reviews: [], leads: [], ideas: [], campaigns: [], settings: {} };
+  let state = row?.data ? JSON.parse(row.data) : { projects: [], videos: [], images: [], restorations: [], proof: [], reviews: [], leads: [], ideas: [], campaigns: [], settings: {} };
   if (!Array.isArray(state.leads)) state.leads = [];
   state.leads.unshift({
     id: crypto.randomUUID(),
@@ -186,8 +186,36 @@ async function handleLead(request, env) {
     email: String(body.email || '').slice(0, 160),
     service: String(body.service || '').slice(0, 100),
     idea: String(body.idea || '').slice(0, 2000),
+    socials: Array.isArray(body.socials) ? body.socials.slice(0,6).map(x => ({ network: String(x?.network || '').slice(0,40), handle: String(x?.handle || '').slice(0,180) })).filter(x=>x.network&&x.handle) : [],
     status: 'Novo'
   });
+  const now = new Date().toISOString();
+  await env.DB.prepare(`INSERT INTO site_state (id, data, updated_at) VALUES (1, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`).bind(JSON.stringify(state), now).run();
+  return json({ ok: true });
+}
+
+
+async function handleReviewSubmission(request, env) {
+  if (request.method !== 'POST') return json({ ok: false, error: 'Método não permitido.' }, 405);
+  const form = await request.formData();
+  const name = String(form.get('name') || '').trim().slice(0, 120);
+  const text = String(form.get('text') || '').trim().slice(0, 1200);
+  const rating = Math.max(1, Math.min(5, Number(form.get('rating') || 5)));
+  if (!name || !text) return json({ ok: false, error: 'Nome e avaliação são obrigatórios.' }, 400);
+  let photoAssetId = '';
+  const photo = form.get('photo');
+  if (photo && typeof photo.arrayBuffer === 'function' && photo.size) {
+    if (!env.MEDIA) return json({ ok: false, error: 'Armazenamento de mídia indisponível.' }, 500);
+    if (photo.size > 2 * 1024 * 1024) return json({ ok: false, error: 'A foto deve ter no máximo 2 MB.' }, 413);
+    if (!String(photo.type || '').startsWith('image/')) return json({ ok: false, error: 'Envie uma imagem válida.' }, 400);
+    photoAssetId = `${Date.now()}-${crypto.randomUUID()}-review-avatar.jpg`;
+    await env.MEDIA.put(photoAssetId, await photo.arrayBuffer(), { httpMetadata: { contentType: photo.type || 'image/jpeg' } });
+  }
+  const row = await env.DB.prepare('SELECT data FROM site_state WHERE id = 1').first();
+  let state = row?.data ? JSON.parse(row.data) : { projects: [], videos: [], images: [], restorations: [], proof: [], reviews: [], leads: [], ideas: [], campaigns: [], settings: {} };
+  if (!Array.isArray(state.reviews)) state.reviews = [];
+  state.reviews.unshift({ id: crypto.randomUUID(), name, text, rating, role: 'Cliente', approved: false, photoAssetId, createdAt: new Date().toISOString() });
   const now = new Date().toISOString();
   await env.DB.prepare(`INSERT INTO site_state (id, data, updated_at) VALUES (1, ?, ?)
     ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`).bind(JSON.stringify(state), now).run();
@@ -240,6 +268,7 @@ export async function onRequest(context) {
     if (root === 'auth') return await handleAuth(parts, request, env);
     if (root === 'state') return await handleState(request, env);
     if (root === 'leads') return await handleLead(request, env);
+    if (root === 'reviews') return await handleReviewSubmission(request, env);
     if (root === 'upload') {
       if (!env.MEDIA) return json({ ok: false, error: 'Binding R2 MEDIA não encontrado.' }, 500);
       return await handleUpload(request, env);
